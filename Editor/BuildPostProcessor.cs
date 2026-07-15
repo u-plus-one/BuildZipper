@@ -112,13 +112,14 @@ namespace BuildZipper.Editor
 				}
 
 				//Perform actions on the build directory based on project setting
-				CleanSourceDirectory(sourceDir);
+				CleanSourceDirectory(report.summary.platform, sourceDir);
 			}
 		}
 
-		private void CleanSourceDirectory(string sourceDir)
+		private void CleanSourceDirectory(BuildTarget target, string sourceDir)
 		{
-			if(BuildSettings.Instance.originalBuildOption == OriginalBuildOption.KeepEmptyDirectory)
+			var sourceBuildAction = BuildSettings.Instance.perPlatformOptions.Get(target).sourceBuildAction;
+			if(sourceBuildAction == SourceBuildAction.LeaveEmptyDirectory)
 			{
 				VerboseLog("Clearing original build directory ...");
 				//Delete contents of the build directory but keep the directory itself
@@ -131,7 +132,7 @@ namespace BuildZipper.Editor
 					File.Delete(file);
 				}
 			}
-			else if(BuildSettings.Instance.originalBuildOption == OriginalBuildOption.Delete)
+			else if(sourceBuildAction == SourceBuildAction.DeleteSource)
 			{
 				VerboseLog("Deleting original build directory ...");
 				Directory.Delete(sourceDir, true);
