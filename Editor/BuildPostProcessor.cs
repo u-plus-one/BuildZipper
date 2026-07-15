@@ -8,9 +8,9 @@ using System.IO.Compression;
 using ZipCompressionLevel = System.IO.Compression.CompressionLevel;
 using System.Diagnostics;
 
-namespace OSXBuild.Editor
+namespace BuildZipper.Editor
 {
-	public class OSXBuildPostProcessor : IPostprocessBuildWithReport
+	public class BuildPostProcessor : IPostprocessBuildWithReport
 	{
 		public int callbackOrder => int.MaxValue;
 
@@ -30,11 +30,11 @@ namespace OSXBuild.Editor
 #if UNITY_EDITOR_WIN
 				//In case of windows, use either windows subsystem for linux (WSL) or manual zip manipulation
 				ZipBuilder builder;
-				if(OSXBuildSettings.Instance.zipCreationMethod == CompressionMethod.WSL)
+				if(BuildSettings.Instance.zipCreationMethod == CompressionMethod.WSL)
 				{
 					builder = new WSLZipBuilder(report);
 				}
-				else if(OSXBuildSettings.Instance.zipCreationMethod == CompressionMethod.ZipManipulation)
+				else if(BuildSettings.Instance.zipCreationMethod == CompressionMethod.ZipManipulation)
 				{
 					builder = new ManualZipBuilder(report);
 				}
@@ -62,7 +62,7 @@ namespace OSXBuild.Editor
 
                 float compressionLevel = 6;
 
-                switch (OSXBuildSettings.Instance.zipCompressionLevel)
+                switch (BuildSettings.Instance.zipCompressionLevel)
                 {
                     case CompressionLevel.None:
                         compressionLevel = 0;
@@ -95,7 +95,7 @@ namespace OSXBuild.Editor
 				process.Start();
 				process.BeginOutputReadLine();
 				process.BeginErrorReadLine();
-				process.WaitForExit(OSXBuildSettings.Instance.wslProcessTimeout * 1000);
+				process.WaitForExit(BuildSettings.Instance.wslProcessTimeout * 1000);
 				if (!process.HasExited)
 				{
 					process.Kill();
@@ -104,7 +104,7 @@ namespace OSXBuild.Editor
 
 				if (File.Exists(zipFileName))
 				{
-					VerboseLog($"OSX Build zip created successfully at {zipFileName}");
+					VerboseLog($"Build zip created successfully at {zipFileName}");
 				}
 				else
 				{
@@ -118,7 +118,7 @@ namespace OSXBuild.Editor
 
 		private void CleanSourceDirectory(string sourceDir)
 		{
-			if(OSXBuildSettings.Instance.originalBuildOption == OriginalBuildOption.KeepEmptyDirectory)
+			if(BuildSettings.Instance.originalBuildOption == OriginalBuildOption.KeepEmptyDirectory)
 			{
 				VerboseLog("Clearing original build directory ...");
 				//Delete contents of the build directory but keep the directory itself
@@ -131,7 +131,7 @@ namespace OSXBuild.Editor
 					File.Delete(file);
 				}
 			}
-			else if(OSXBuildSettings.Instance.originalBuildOption == OriginalBuildOption.Delete)
+			else if(BuildSettings.Instance.originalBuildOption == OriginalBuildOption.Delete)
 			{
 				VerboseLog("Deleting original build directory ...");
 				Directory.Delete(sourceDir, true);
@@ -141,15 +141,15 @@ namespace OSXBuild.Editor
 		private void CreateZip(string folder, string zip)
 		{
 			ZipCompressionLevel compressionLevel;
-			if(OSXBuildSettings.Instance.zipCompressionLevel == CompressionLevel.Optimal) compressionLevel = ZipCompressionLevel.Optimal;
-			else if(OSXBuildSettings.Instance.zipCompressionLevel == CompressionLevel.Fastest) compressionLevel = ZipCompressionLevel.Fastest;
+			if(BuildSettings.Instance.zipCompressionLevel == CompressionLevel.Optimal) compressionLevel = ZipCompressionLevel.Optimal;
+			else if(BuildSettings.Instance.zipCompressionLevel == CompressionLevel.Fastest) compressionLevel = ZipCompressionLevel.Fastest;
 			else compressionLevel = ZipCompressionLevel.NoCompression;
 			ZipFile.CreateFromDirectory(folder, zip, compressionLevel, true);
 		}
 
 		public static void VerboseLog(string message)
 		{
-			if(OSXBuildSettings.Instance.verboseLogging)
+			if(BuildSettings.Instance.verboseLogging)
 			{
 				UnityEngine.Debug.Log(message);
 			}

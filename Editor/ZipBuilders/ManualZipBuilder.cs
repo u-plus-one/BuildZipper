@@ -6,7 +6,7 @@ using UnityEditor.Build.Reporting;
 using UnityEngine;
 using ZipCompressionLevel = System.IO.Compression.CompressionLevel;
 
-namespace OSXBuild.Editor
+namespace BuildZipper.Editor
 {
 	public class ManualZipBuilder : ZipBuilder
 	{
@@ -28,7 +28,7 @@ namespace OSXBuild.Editor
 			//Compress executable into a zip file
 			ZipCompressionLevel compressionLevel = ZipCompressionLevel.Fastest;
 
-			switch (OSXBuildSettings.Instance.zipCompressionLevel)
+			switch (BuildSettings.Instance.zipCompressionLevel)
             {
                 case CompressionLevel.None:
                     compressionLevel = ZipCompressionLevel.NoCompression;

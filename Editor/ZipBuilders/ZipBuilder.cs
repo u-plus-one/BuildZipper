@@ -1,7 +1,7 @@
 using UnityEditor.Build.Reporting;
 using UnityEngine;
 
-namespace OSXBuild.Editor
+namespace BuildZipper.Editor
 {
 	public abstract class ZipBuilder
 	{

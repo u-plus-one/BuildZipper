@@ -1,7 +1,7 @@
 {
   "name": "com.github.u-plus-one.unityosxbuild",
-  "version": "1.0.1",
-  "displayName": "OSX Build",
+  "version": "2.0.0",
+  "displayName": "Build Zipper",
   "description": "A Unity package for zipping builds automatically, and on Windows, fix OSX builds by adding the executable bits in the process.",
   "unity": "2022.3",
   "author": {
@@ -18,5 +18,5 @@
   ],
   "license": "See LICENSE.md",
   "hideInEditor": true,
-  "documentationUrl": "https://github.com/D3TONAT0R/UnityOSXBuild/blob/main/README.md"
+  "documentationUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/README.md"
 }

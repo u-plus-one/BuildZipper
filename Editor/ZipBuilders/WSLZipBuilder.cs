@@ -5,9 +5,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEngine;
-using static OSXBuild.Editor.OSXBuildPostProcessor;
+using static BuildZipper.Editor.BuildPostProcessor;
 
-namespace OSXBuild.Editor
+namespace BuildZipper.Editor
 {
 	public class WSLZipBuilder : ZipBuilder
 	{
@@ -63,7 +63,7 @@ namespace OSXBuild.Editor
 			#region Zipping process
 			float compressionLevel = 6;
 
-			switch (OSXBuildSettings.Instance.zipCompressionLevel)
+			switch (BuildSettings.Instance.zipCompressionLevel)
 			{
 				case CompressionLevel.None:
 					compressionLevel = 0;
@@ -96,7 +96,7 @@ namespace OSXBuild.Editor
 			process.Start();
 			process.BeginOutputReadLine();
 			process.BeginErrorReadLine();
-			process.WaitForExit(OSXBuildSettings.Instance.wslProcessTimeout * 1000);
+			process.WaitForExit(BuildSettings.Instance.wslProcessTimeout * 1000);
 			if (!process.HasExited)
 			{
 				process.Kill();

@@ -1,5 +1,5 @@
 {
-    "name": "OSXBuild.Editor",
+    "name": "BuildZipper.Editor",
     "rootNamespace": "",
     "references": [],
     "includePlatforms": [

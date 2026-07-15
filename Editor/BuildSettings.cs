@@ -2,7 +2,7 @@ using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace OSXBuild.Editor
+namespace BuildZipper.Editor
 {
 	public enum CompressionMethod
 	{
@@ -24,7 +24,7 @@ namespace OSXBuild.Editor
 		KeepEmptyDirectory = 2
 	}
 
-    public class OSXBuildSettings : ScriptableObject
+    public class BuildSettings : ScriptableObject
     {
 		[Tooltip("Which method to use for creating the build zip file. (Windows Editor only)")]
 		public CompressionMethod zipCreationMethod = CompressionMethod.WSL;
@@ -37,7 +37,7 @@ namespace OSXBuild.Editor
 		[Tooltip("If checked, prints additional debugging information about the build process.")]
 		public bool verboseLogging = false;
 
-		public static OSXBuildSettings Instance
+		public static BuildSettings Instance
 		{
 			get
 			{
@@ -46,9 +46,9 @@ namespace OSXBuild.Editor
 			}
 		}
 
-		private static OSXBuildSettings instance;
+		private static BuildSettings instance;
 
-	    private static string ProjectAssetPath => Path.Combine("ProjectSettings", "OSXBuildPreferences.asset");
+	    private static string ProjectAssetPath => Path.Combine("ProjectSettings", "BuildZipperSettings.asset");
 
 	    private static void Initialize()
 	    {
@@ -67,7 +67,7 @@ namespace OSXBuild.Editor
 
 		private static void CreateNewSettings()
 		{
-			instance = CreateInstance<OSXBuildSettings>();
+			instance = CreateInstance<BuildSettings>();
 		}
 
 		public static void Save()
@@ -79,7 +79,7 @@ namespace OSXBuild.Editor
 		private static void Load()
 		{
 			var json = File.ReadAllText(ProjectAssetPath);
-			instance = CreateInstance<OSXBuildSettings>();
+			instance = CreateInstance<BuildSettings>();
 			EditorJsonUtility.FromJsonOverwrite(json, instance);
 		}
     }
