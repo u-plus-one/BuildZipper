@@ -16,10 +16,12 @@ namespace BuildZipper.Editor
 
 		public void OnPostprocessBuild(BuildReport report)
 		{
-			if(report.summary.platform == BuildTarget.StandaloneOSX)
+			if(BuildSettings.Instance.perPlatformOptions.Get(report.summary.platform).createZip)
 			{
 				string sourceDir = report.summary.outputPath;
-				string zipFileName = sourceDir + ".zip";
+				string zipFileName;
+				if(Directory.Exists(sourceDir)) zipFileName = sourceDir + ".zip";
+				else zipFileName = Directory.GetParent(sourceDir) + ".zip";
 
 				//Delete existing zip if present
 				if(File.Exists(zipFileName))
@@ -108,7 +110,7 @@ namespace BuildZipper.Editor
 				}
 				else
 				{
-					UnityEngine.Debug.LogError("OSX build zip creation failed.");
+					UnityEngine.Debug.LogError("Build zip creation failed.");
 				}
 
 				//Perform actions on the build directory based on project setting

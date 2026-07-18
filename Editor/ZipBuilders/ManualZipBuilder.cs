@@ -43,18 +43,42 @@ namespace BuildZipper.Editor
                     break;
             }
 
-            ZipFile.CreateFromDirectory(rootPath, targetZip, compressionLevel, true);
+			if (Directory.Exists(rootPath))
+			{
+				ZipFile.CreateFromDirectory(rootPath, targetZip, compressionLevel, true);
+			}
+			else
+			{
+				//Add the .exe and the _Data directory to the zip
+				using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Create))
+				{
+					zip.CreateEntryFromFile(rootPath, Path.GetFileName(rootPath), compressionLevel);
+					var dataDir = rootPath.Replace(".exe", "_Data");
+					if (Directory.Exists(dataDir))
+					{
+						foreach (var file in Directory.GetFiles(dataDir, "*", SearchOption.AllDirectories))
+						{
+							var relativePath = Path.GetRelativePath(Directory.GetParent(rootPath).FullName, file);
+							zip.CreateEntryFromFile(file, relativePath, compressionLevel);
+						}
+					}
+				}
+			}
 
+			bool requiresExecutableFlag = buildReport.summary.platform == BuildTarget.StandaloneOSX;
 			int entryCount;
 			//Modify zip to set the executable attributes
-			using(var zip = ZipFile.Open(targetZip, ZipArchiveMode.Update))
+			using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Update))
 			{
 				entryCount = zip.Entries.Count;
-				//Set standard unix flags for all files and executable flags for the executable
-				foreach(var entry in zip.Entries)
+				if (requiresExecutableFlag)
 				{
-					bool executable = entry.FullName == executableFilePath;
-					SetUnixFlags(entry, executable ? UNIX_FLAGS_EXECUTABLE : UNIX_FLAGS_DEFAULT);
+					//Set standard unix flags for all files and executable flags for the executable
+					foreach (var entry in zip.Entries)
+					{
+						bool executable = entry.FullName == executableFilePath;
+						SetUnixFlags(entry, executable ? UNIX_FLAGS_EXECUTABLE : UNIX_FLAGS_DEFAULT);
+					}
 				}
 			}
 
@@ -62,7 +86,10 @@ namespace BuildZipper.Editor
 			SetHostOS(rootPath, entryCount);
 
 			//Self test
-			CheckExecutableFlags(rootPath, executableFilePath);
+			if (requiresExecutableFlag)
+			{
+				CheckExecutableFlags(rootPath, executableFilePath);
+			}
 		}
 
 		private static void SetHostOS(string rootPath, int entryCount)
