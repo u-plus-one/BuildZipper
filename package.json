@@ -1,5 +1,5 @@
 {
-  "name": "com.github.u-plus-one.unityosxbuild",
+  "name": "com.github.u-plus-one.buildzipper",
   "version": "2.0.0",
   "displayName": "Build Zipper",
   "description": "A Unity package for zipping builds automatically, and on Windows, fix OSX builds by adding the executable bits in the process.",
