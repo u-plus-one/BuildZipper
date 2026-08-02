@@ -11,12 +11,11 @@ namespace BuildZipper.Editor
 {
 	public class WSLZipBuilder : ZipBuilder
 	{
-		public WSLZipBuilder(BuildReport report) : base(report)
+		public WSLZipBuilder()
 		{
-
 		}
 
-		public override void CreateZip(string buildDirectory, string targetZip)
+		public override void CreateZip(string buildDirectory, string targetZip, BuildReport report, string[] rootFiles)
 		{
 			#region Variables
 			bool previousBuildRenamed = false;

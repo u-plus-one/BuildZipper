@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor.Build.Reporting;
 using UnityEditor.Build;
@@ -7,6 +8,7 @@ using UnityEngine;
 using System.IO.Compression;
 using ZipCompressionLevel = System.IO.Compression.CompressionLevel;
 using System.Diagnostics;
+using Debug = UnityEngine.Debug;
 
 namespace BuildZipper.Editor
 {
@@ -18,10 +20,22 @@ namespace BuildZipper.Editor
 		{
 			if(BuildSettings.Instance.perPlatformOptions.Get(report.summary.platform).createZip)
 			{
-				string sourceDir = report.summary.outputPath;
+				string sourceDir;
+				// Do not go one level up in the case of macOS builds, as the output path is already self-contained
+				/*
+				if (report.summary.platform == BuildTarget.StandaloneOSX) sourceDir = report.summary.outputPath;
+				else sourceDir = Directory.GetParent(report.summary.outputPath).FullName;
+				*/
+				sourceDir = Directory.GetParent(report.summary.outputPath).FullName;
+				Debug.Log("Source dir "+sourceDir);
+				
 				string zipFileName;
+				/*
 				if(Directory.Exists(sourceDir)) zipFileName = sourceDir + ".zip";
 				else zipFileName = Directory.GetParent(sourceDir) + ".zip";
+				*/
+				if (report.summary.platform == BuildTarget.StandaloneOSX) zipFileName = Path.Combine(sourceDir, Path.GetFileName(report.summary.outputPath) + ".zip");
+				else zipFileName = sourceDir + ".zip";
 
 				//Delete existing zip if present
 				if(File.Exists(zipFileName))
@@ -31,21 +45,22 @@ namespace BuildZipper.Editor
 
 #if UNITY_EDITOR_WIN
 				//In case of windows, use either windows subsystem for linux (WSL) or manual zip manipulation
+				var rootFiles = GetRootFiles(report, sourceDir);
 				ZipBuilder builder;
 				if(BuildSettings.Instance.zipCreationMethod == CompressionMethod.WSL)
 				{
-					builder = new WSLZipBuilder(report);
+					builder = new WSLZipBuilder();
 				}
 				else if(BuildSettings.Instance.zipCreationMethod == CompressionMethod.ZipManipulation)
 				{
-					builder = new ManualZipBuilder(report);
+					builder = new ManualZipBuilder();
 				}
 				else
 				{
 					throw new System.NotImplementedException();
 				}
 				VerboseLog($"Using {builder.GetType().Name} to create Zip ...");
-				builder.CreateZip(sourceDir, zipFileName);
+				builder.CreateZip(sourceDir, zipFileName, report, rootFiles);
 #else
 				//In case of MacOS / Linux, just create a normal zip without modifying it
 				//TODO: Test MacOS/Linux zipping code
@@ -116,6 +131,29 @@ namespace BuildZipper.Editor
 				//Perform actions on the build directory based on project setting
 				CleanSourceDirectory(report.summary.platform, sourceDir);
 			}
+		}
+
+		private string[] GetRootFiles(BuildReport report, string outputRoot)
+		{
+			if (report.summary.platform == BuildTarget.StandaloneOSX)
+			{
+				return new string[] { Path.GetFileName(report.summary.outputPath) };
+			}
+			List<string> rootFiles = new List<string>();
+			foreach (var f in report.GetFiles())
+			{
+				string path = Path.GetRelativePath(outputRoot, f.path).Split(Path.DirectorySeparatorChar)[0];
+				if (path.Contains("DoNotShip", StringComparison.OrdinalIgnoreCase) || path.Contains("DontShip", StringComparison.OrdinalIgnoreCase))
+				{
+					//Ignore this folder
+					continue;
+				}
+				if (!rootFiles.Contains(path))
+				{
+					rootFiles.Add(path);
+				}
+			}
+			return rootFiles.ToArray();
 		}
 
 		private void CleanSourceDirectory(BuildTarget target, string sourceDir)

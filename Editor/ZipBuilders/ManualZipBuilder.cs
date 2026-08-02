@@ -15,15 +15,13 @@ namespace BuildZipper.Editor
 		const uint UNIX_FLAGS_DEFAULT =    0b10000001101101100000000000000000;
 		//						             \------/\------/\------/\------/
 
-		public ManualZipBuilder(BuildReport report) : base(report) 
+		public ManualZipBuilder()
 		{
-
 		}
 
-		public override void CreateZip(string rootPath, string targetZip)
+		public override void CreateZip(string rootPath, string targetZip, BuildReport report, string[] rootFiles)
 		{
-			var buildName = Path.GetFileName(rootPath);
-			var executableFilePath = $"{buildName}/Contents/MacOS/{PlayerSettings.productName}";
+			var buildName = Path.GetFileName(report.summary.outputPath);
 
 			//Compress executable into a zip file
 			ZipCompressionLevel compressionLevel = ZipCompressionLevel.Fastest;
@@ -43,29 +41,38 @@ namespace BuildZipper.Editor
                     break;
             }
 
-			if (Directory.Exists(rootPath))
+			using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Create))
 			{
-				ZipFile.CreateFromDirectory(rootPath, targetZip, compressionLevel, true);
-			}
-			else
-			{
-				//Add the .exe and the _Data directory to the zip
-				using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Create))
+				foreach (var rootFile in rootFiles)
 				{
-					zip.CreateEntryFromFile(rootPath, Path.GetFileName(rootPath), compressionLevel);
-					var dataDir = rootPath.Replace(".exe", "_Data");
-					if (Directory.Exists(dataDir))
+					Debug.Log("root "+ rootFile);
+					var fullRootFilePath = Path.Combine(rootPath, rootFile);
+					/*
+					if (report.summary.platform == BuildTarget.StandaloneOSX)
 					{
-						foreach (var file in Directory.GetFiles(dataDir, "*", SearchOption.AllDirectories))
+						var name = Path.GetFileName(rootPath);
+						fullRootFilePath = Path.Combine(fullRootFilePath);
+						Debug.Log(name + " -> " + fullRootFilePath);
+					}
+					*/
+					if (File.Exists(fullRootFilePath))
+					{
+						zip.CreateEntryFromFile(fullRootFilePath, Path.GetFileName(fullRootFilePath), compressionLevel);
+					}
+					else if(Directory.Exists(fullRootFilePath))
+					{
+						foreach (var file in Directory.GetFiles(fullRootFilePath, "*", SearchOption.AllDirectories))
 						{
-							var relativePath = Path.GetRelativePath(Directory.GetParent(rootPath).FullName, file);
+							var relativePath = Path.GetRelativePath(rootPath, file);
 							zip.CreateEntryFromFile(file, relativePath, compressionLevel);
 						}
 					}
+					else throw new FileNotFoundException($"Could not find file or directory to add to zip archive: {fullRootFilePath}");
 				}
 			}
+			var executableFilePath = $"{buildName}/Contents/MacOS/{PlayerSettings.productName}";
 
-			bool requiresExecutableFlag = buildReport.summary.platform == BuildTarget.StandaloneOSX;
+			bool requiresExecutableFlag = report.summary.platform == BuildTarget.StandaloneOSX;
 			int entryCount;
 			//Modify zip to set the executable attributes
 			using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Update))
@@ -133,14 +140,31 @@ namespace BuildZipper.Editor
 
 		private static void CheckExecutableFlags(string filename, string executableFilePath)
 		{
+			if(!File.Exists(filename)) throw new FileNotFoundException($"Could not find zip file to check: {filename}");
 			using var zip = ZipFile.OpenRead(filename);
-			var attributes = zip.GetEntry(executableFilePath).ExternalAttributes;
+			Debug.Log("zip " +filename);
+			Debug.Log(executableFilePath);
+			ZipArchiveEntry executableEntry = null;
+			foreach (var entry in zip.Entries)
+			{
+				if(entry.FullName.Replace('\\', '/') == executableFilePath)
+				{
+					executableEntry = entry;
+					break;
+				}
+			}
+			if (executableEntry == null)
+			{
+				throw new FileNotFoundException($"Could not find executable file: {filename}");
+			}
+			int attributes = -1;
+			
 			bool test;
 			unchecked
 			{
 				test = ((uint)attributes & UNIX_FLAGS_EXECUTABLE) == UNIX_FLAGS_EXECUTABLE;
 			}
-			string base2 = Convert.ToString(zip.GetEntry(executableFilePath).ExternalAttributes, 2).PadLeft(32, '0');
+			string base2 = Convert.ToString(executableEntry.ExternalAttributes, 2).PadLeft(32, '0');
 			if(!test) Debug.LogError("Unix perms test failed: " + base2);
 		}
 	} 

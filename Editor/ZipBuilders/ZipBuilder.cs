@@ -5,13 +5,6 @@ namespace BuildZipper.Editor
 {
 	public abstract class ZipBuilder
 	{
-		protected readonly BuildReport buildReport;
-
-		protected ZipBuilder(BuildReport buildReport)
-		{
-			this.buildReport = buildReport;
-		}
-
-		public abstract void CreateZip(string buildDirectory, string targetZip);
+		public abstract void CreateZip(string buildDirectory, string targetZip, BuildReport report, string[] rootFiles);
 	} 
 }
