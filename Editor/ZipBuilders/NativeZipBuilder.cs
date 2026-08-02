@@ -44,7 +44,7 @@ namespace BuildZipper.Editor
 				StartInfo = new ProcessStartInfo()
 				{
 					FileName = "bash",
-					Arguments = $"-c \"cd {buildFolder} && zip -{compressionLevel} -r {outputZipPath}.zip {filesArgs}\"",
+					Arguments = $"-c \"cd {buildFolder} && zip -{compressionLevel} -r {outputZipPath} {filesArgs}\"",
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
 					UseShellExecute = false,
