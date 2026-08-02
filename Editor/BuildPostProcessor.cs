@@ -21,19 +21,9 @@ namespace BuildZipper.Editor
 			if(BuildSettings.Instance.perPlatformOptions.Get(report.summary.platform).createZip)
 			{
 				string sourceDir;
-				// Do not go one level up in the case of macOS builds, as the output path is already self-contained
-				/*
-				if (report.summary.platform == BuildTarget.StandaloneOSX) sourceDir = report.summary.outputPath;
-				else sourceDir = Directory.GetParent(report.summary.outputPath).FullName;
-				*/
 				sourceDir = Directory.GetParent(report.summary.outputPath).FullName;
-				Debug.Log("Source dir "+sourceDir);
 				
 				string zipFileName;
-				/*
-				if(Directory.Exists(sourceDir)) zipFileName = sourceDir + ".zip";
-				else zipFileName = Directory.GetParent(sourceDir) + ".zip";
-				*/
 				if (report.summary.platform == BuildTarget.StandaloneOSX) zipFileName = Path.Combine(sourceDir, Path.GetFileName(report.summary.outputPath) + ".zip");
 				else zipFileName = sourceDir + ".zip";
 
@@ -192,7 +182,7 @@ namespace BuildZipper.Editor
 		{
 			if(BuildSettings.Instance.verboseLogging)
 			{
-				UnityEngine.Debug.Log(message);
+				Debug.Log(message);
 			}
 		}
 

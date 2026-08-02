@@ -45,16 +45,7 @@ namespace BuildZipper.Editor
 			{
 				foreach (var rootFile in rootFiles)
 				{
-					Debug.Log("root "+ rootFile);
 					var fullRootFilePath = Path.Combine(rootPath, rootFile);
-					/*
-					if (report.summary.platform == BuildTarget.StandaloneOSX)
-					{
-						var name = Path.GetFileName(rootPath);
-						fullRootFilePath = Path.Combine(fullRootFilePath);
-						Debug.Log(name + " -> " + fullRootFilePath);
-					}
-					*/
 					if (File.Exists(fullRootFilePath))
 					{
 						zip.CreateEntryFromFile(fullRootFilePath, Path.GetFileName(fullRootFilePath), compressionLevel);
@@ -124,7 +115,7 @@ namespace BuildZipper.Editor
 			}
 			else
 			{
-				Debug.Log($"Zip Host OS changed successfully ({modifiedEntries} entries modified)");
+				BuildPostProcessor.VerboseLog($"Zip Host OS changed successfully ({modifiedEntries} entries modified)");
 			}
 			File.WriteAllBytes(filename, bytes);
 		}
@@ -142,8 +133,6 @@ namespace BuildZipper.Editor
 		{
 			if(!File.Exists(filename)) throw new FileNotFoundException($"Could not find zip file to check: {filename}");
 			using var zip = ZipFile.OpenRead(filename);
-			Debug.Log("zip " +filename);
-			Debug.Log(executableFilePath);
 			ZipArchiveEntry executableEntry = null;
 			foreach (var entry in zip.Entries)
 			{
