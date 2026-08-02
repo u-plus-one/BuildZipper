@@ -21,8 +21,7 @@ namespace BuildZipper.Editor
 			bool previousBuildRenamed = false;
 			bool oldBuildRecycled = false;
 
-			string buildFolder = sourcePath;
-			string buildFolderWsl = SanitizeLinuxPath(buildFolder);
+			string buildFolderWsl = SanitizeLinuxPath(sourcePath);
 
 			string buildName = Path.GetFileName(outputZipPath);
 			buildName = buildName.Replace(" ", @"\ ");
