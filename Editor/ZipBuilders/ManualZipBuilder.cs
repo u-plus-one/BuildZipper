@@ -83,22 +83,22 @@ namespace BuildZipper.Editor
 			}
 
 			//Manual trickery to pretend that the zip was created on unix
-			SetHostOS(rootPath, entryCount);
+			SetHostOS(targetZip, entryCount);
 
 			//Self test
 			if (requiresExecutableFlag)
 			{
-				CheckExecutableFlags(rootPath, executableFilePath);
+				CheckExecutableFlags(targetZip, executableFilePath);
 			}
 		}
 
-		private static void SetHostOS(string rootPath, int entryCount)
+		private static void SetHostOS(string filename, int entryCount)
 		{
 			const byte P = (byte)'P';
 			const byte K = (byte)'K';
 			//Minimum version needed to extract: 0x14 (20) = 2.0
 			const byte V = 0x14;
-			var bytes = File.ReadAllBytes(rootPath + ".zip");
+			var bytes = File.ReadAllBytes(filename);
 			int modifiedEntries = 0;
 			for(int i = 0; i < bytes.Length; i++)
 			{
@@ -119,7 +119,7 @@ namespace BuildZipper.Editor
 			{
 				Debug.Log($"Zip Host OS changed successfully ({modifiedEntries} entries modified)");
 			}
-			File.WriteAllBytes(rootPath + ".zip", bytes);
+			File.WriteAllBytes(filename, bytes);
 		}
 
 		private static void SetUnixFlags(ZipArchiveEntry entry, uint flags)
@@ -131,9 +131,9 @@ namespace BuildZipper.Editor
 			}
 		}
 
-		private static void CheckExecutableFlags(string rootPath, string executableFilePath)
+		private static void CheckExecutableFlags(string filename, string executableFilePath)
 		{
-			using var zip = ZipFile.OpenRead(rootPath + ".zip");
+			using var zip = ZipFile.OpenRead(filename);
 			var attributes = zip.GetEntry(executableFilePath).ExternalAttributes;
 			bool test;
 			unchecked
