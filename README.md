@@ -1,6 +1,6 @@
-# UnityOSXBuild
+# Build Zipper
 
-A Unity package for zipping builds automatically, and on Windows, fix OSX builds by adding the executable bits in the process.
+A Unity package for zipping builds automatically, and on Windows, fixing OSX builds by adding missing executable flags in the process.
 
 ## Usage
 
@@ -8,15 +8,19 @@ Install the package according to the [installation instructions](#installation).
 
 ### Project settings
 
-This package comes with project specific settings, found at `Edit > Project Settings... > OSX Zip Options`.
+This package comes with project specific settings, found at `Edit > Project Settings... > OSX Zip Options`. To start creating zip files when building, select the target platforms you want to create zips for.
 
-|Setting|Description
-|---|---
-|[Zip Creation Method](#zip-creation-method)|Which method to use for creating the build zip file. (Windows Editor only).
-|[Zip Compression Level](#zip-compression-level)|The compression level to apply when generating the zip file.
-|Original Build Option|Determines what happens to the original build directory that was used to create the zip file.
-|WSL Process Timeout|The time (in seconds) until the wsl process times out.
-|Verbose Logging|If checked, prints additional debugging information about the build process.
+
+| Setting                                         |Description
+|-------------------------------------------------|---
+| Create Zip[^1]                                  |Whether to create a zip file for the target platform. If unchecked, the build is left untouched.
+| Source Build Action[^1]                         |Determies what to do with the original build directory. `Keep` leaves the build directory intact. `Delete` deletes the directory, leaving only the zip file. `Leave Empty Directory` clears out its contents, leaving an empty folder.
+| [Zip Creation Method](#zip-creation-method)     |Which method to use for creating the build zip file (Windows Editor only). On macOS and Linux, the zip is created using native zip commands.
+| [Zip Compression Level](#zip-compression-level) |The compression level to apply when generating the zip file.
+| WSL Process Timeout                             |The time (in seconds) until the wsl process times out.
+| Verbose Logging                                 |If checked, prints additional debugging information about the build process.
+
+[^1]: Per-platform setting
 
 #### Zip Creation Method
 
@@ -51,7 +55,7 @@ A Windows-only solution, that zips the build, then edits very specific bytes of 
 
 Open the Package Manager window, click on "Add Package from Git URL ...", then enter the following:
 ```
-https://github.com/u-plus-one/unityosxbuild.git
+https://github.com/u-plus-one/buildzipper.git
 ```
 
 ### Option 2: Manually Editing packages.json
@@ -59,7 +63,7 @@ https://github.com/u-plus-one/unityosxbuild.git
 Add the following line to your project's `Packages/manifest.json`:
 
 ```json
-"com.github.u-plus-one.unityosxbuild": "https://github.com/u-plus-one/unityosxbuild.git"
+"com.github.u-plus-one.buildzipper": "https://github.com/u-plus-one/buildzipper.git"
 ```
 
 ### Option 3: Manual Installation (not recommended)
@@ -68,7 +72,7 @@ You can also download this repository and extract the `Editor` directory file an
 
 ## The Problem
 
-Any build for OSX (otherwise known as MacOS) built on Windows devices, do in general *not* work. Instead, you get presented with an error, saying `The application "game-name" can't be opened`, with no more information.
+Any build for OSX (otherwise known as macOS) built on Windows devices, do in general *not* work. Instead, you get presented with an error, saying `The application "game-name" can't be opened`, with no more information.
 
 The reason why OSX builds built on Windows do not work on OSX, is the fact that Windows does not keep track of unix-specific file attributes (read/write/execute attributes), which are needed for OSX to run an executable. This executable attribute generally can only be added on Unix devices, which both Linux and OSX devices are. The only current solutions for creating an OSX build, are building on either Linux or OSX itself.
 
@@ -87,6 +91,6 @@ The zip creation process runs at the very end of the build process, meaning that
 
 ## Attribution
 
-[@lajawi](https://github.com/lajawi) - Unix attributes research, WSL zipper
+[@lajawi](https://github.com/lajawi) - Unix file attributes research, WSL zipper
 
 [@d3tonat0r](https://github.com/d3tonat0r) - Package structure, Manual zip builder

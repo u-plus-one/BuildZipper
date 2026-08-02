@@ -111,7 +111,7 @@ namespace BuildZipper.Editor
 					File.Delete(file);
 				}
 			}
-			else if (sourceBuildAction == SourceBuildAction.DeleteSource)
+			else if (sourceBuildAction == SourceBuildAction.Delete)
 			{
 				VerboseLog("Deleting original build directory ...");
 				Directory.Delete(sourceDir, true);
@@ -163,7 +163,7 @@ namespace BuildZipper.Editor
 
 		public static string GetCommandOutput(string commandFileName, string commandArguments)
 		{
-			var proc = new Process()
+			using var proc = new Process()
 			{
 				StartInfo = new ProcessStartInfo()
 				{

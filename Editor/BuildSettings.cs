@@ -20,8 +20,8 @@ namespace BuildZipper.Editor
 
 	public enum SourceBuildAction
 	{
-		KeepSource = 0,
-		DeleteSource = 1,
+		Keep = 0,
+		Delete = 1,
 		LeaveEmptyDirectory = 2
 	}
 
@@ -31,7 +31,7 @@ namespace BuildZipper.Editor
 	    public class BuildOptions
 	    {
 		    public bool createZip;
-		    public SourceBuildAction sourceBuildAction = SourceBuildAction.KeepSource;
+		    public SourceBuildAction sourceBuildAction = SourceBuildAction.Keep;
 	    }
 	    
 	    [System.Serializable]
