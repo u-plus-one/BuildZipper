@@ -19,7 +19,7 @@ namespace BuildZipper.Editor
 		{
 		}
 
-		public override void CreateZip(string rootPath, string targetZip, BuildReport report, string[] rootFiles)
+		public override void CreateZip(string sourcePath, string[] filesToInclude, string outputZipPath, BuildReport report)
 		{
 			var buildName = Path.GetFileName(report.summary.outputPath);
 
@@ -41,11 +41,11 @@ namespace BuildZipper.Editor
                     break;
             }
 
-			using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Create))
+			using (var zip = ZipFile.Open(outputZipPath, ZipArchiveMode.Create))
 			{
-				foreach (var rootFile in rootFiles)
+				foreach (var rootFile in filesToInclude)
 				{
-					var fullRootFilePath = Path.Combine(rootPath, rootFile);
+					var fullRootFilePath = Path.Combine(sourcePath, rootFile);
 					if (File.Exists(fullRootFilePath))
 					{
 						zip.CreateEntryFromFile(fullRootFilePath, Path.GetFileName(fullRootFilePath), compressionLevel);
@@ -54,7 +54,7 @@ namespace BuildZipper.Editor
 					{
 						foreach (var file in Directory.GetFiles(fullRootFilePath, "*", SearchOption.AllDirectories))
 						{
-							var relativePath = Path.GetRelativePath(rootPath, file);
+							var relativePath = Path.GetRelativePath(sourcePath, file);
 							zip.CreateEntryFromFile(file, relativePath, compressionLevel);
 						}
 					}
@@ -66,7 +66,7 @@ namespace BuildZipper.Editor
 			bool requiresExecutableFlag = report.summary.platform == BuildTarget.StandaloneOSX;
 			int entryCount;
 			//Modify zip to set the executable attributes
-			using (var zip = ZipFile.Open(targetZip, ZipArchiveMode.Update))
+			using (var zip = ZipFile.Open(outputZipPath, ZipArchiveMode.Update))
 			{
 				entryCount = zip.Entries.Count;
 				if (requiresExecutableFlag)
@@ -81,12 +81,12 @@ namespace BuildZipper.Editor
 			}
 
 			//Manual trickery to pretend that the zip was created on unix
-			SetHostOS(targetZip, entryCount);
+			SetHostOS(outputZipPath, entryCount);
 
 			//Self test
 			if (requiresExecutableFlag)
 			{
-				CheckExecutableFlags(targetZip, executableFilePath);
+				CheckExecutableFlags(outputZipPath, executableFilePath);
 			}
 		}
 

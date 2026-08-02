@@ -50,7 +50,7 @@ namespace BuildZipper.Editor
 					throw new System.NotImplementedException();
 				}
 				VerboseLog($"Using {builder.GetType().Name} to create Zip ...");
-				builder.CreateZip(sourceDir, zipFileName, report, rootFiles);
+				builder.CreateZip(sourceDir, rootFiles, zipFileName, report);
 #else
 				//In case of MacOS / Linux, just create a normal zip without modifying it
 				//TODO: Test MacOS/Linux zipping code

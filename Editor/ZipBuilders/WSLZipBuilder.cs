@@ -15,26 +15,19 @@ namespace BuildZipper.Editor
 		{
 		}
 
-		public override void CreateZip(string buildDirectory, string targetZip, BuildReport report, string[] rootFiles)
+		public override void CreateZip(string sourcePath, string[] filesToInclude, string outputZipPath, BuildReport report)
 		{
 			#region Variables
 			bool previousBuildRenamed = false;
 			bool oldBuildRecycled = false;
 
-			string buildFolder = Directory.GetParent(buildDirectory).FullName;
-			char driveLetter = buildFolder[0];
+			string buildFolder = sourcePath;
+			string buildFolderWsl = SanitizeLinuxPath(buildFolder);
 
-			string buildFolderWsl = buildFolder;
-			if (buildFolderWsl[1].Equals(':'))
-			{
-				buildFolderWsl = buildFolderWsl.Substring(2);
-				buildFolderWsl = "/mnt/" + char.ToLower(driveLetter).ToString() + buildFolderWsl;
-			}
-			buildFolderWsl = buildFolderWsl.Replace("\\", "/");
-			buildFolderWsl = buildFolderWsl.Replace(" ", @"\ ");
-
-			string buildName = Path.GetFileName(buildDirectory);
+			string buildName = Path.GetFileName(outputZipPath);
 			buildName = buildName.Replace(" ", @"\ ");
+			
+			string outputZipPathWsl = SanitizeLinuxPath(outputZipPath);
 
 			string productName = Application.productName;
 			#endregion
@@ -76,13 +69,16 @@ namespace BuildZipper.Editor
 					compressionLevel = 9;
 					break;
 			}
+			
+			// Escape spaces for WSL
+			string filesArgs = string.Join(" ", filesToInclude.Select(f => f.Replace(" ", @"\ ")));
 
 			var process = new Process()
 			{
 				StartInfo = new ProcessStartInfo()
 				{
 					FileName = "wsl",
-					Arguments = $"-e bash -c \"cd {buildFolderWsl} && zip -{compressionLevel} -r {buildName}.zip {buildName}\"",
+					Arguments = $"-e bash -c \"cd {buildFolderWsl} && zip -{compressionLevel} -r {outputZipPathWsl} {filesArgs}\"",
 					RedirectStandardOutput = true,
 					RedirectStandardError = true,
 					UseShellExecute = false,
@@ -90,6 +86,7 @@ namespace BuildZipper.Editor
 				},
 				EnableRaisingEvents = true,
 			};
+			VerboseLog($"Running WSL zip command: {process.StartInfo.FileName} {process.StartInfo.Arguments}");
 			process.OutputDataReceived += Process_OutputDataReceived;
 			process.ErrorDataReceived += Process_ErrorDataReceived;
 			process.Start();
@@ -101,6 +98,20 @@ namespace BuildZipper.Editor
 				process.Kill();
 			}
 			#endregion
+		}
+
+		private string SanitizeLinuxPath(string path)
+		{
+			char driveLetter = path[0];
+			var linuxPath = path;
+			if (linuxPath[1].Equals(':'))
+			{
+				linuxPath = linuxPath.Substring(2);
+				linuxPath = "/mnt/" + char.ToLower(driveLetter).ToString() + linuxPath;
+			}
+			linuxPath = linuxPath.Replace("\\", "/");
+			linuxPath = linuxPath.Replace(" ", @"\ ");
+			return linuxPath;
 		}
 	}
 }
