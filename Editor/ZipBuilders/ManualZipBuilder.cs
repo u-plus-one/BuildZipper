@@ -48,14 +48,14 @@ namespace BuildZipper.Editor
 					var fullRootFilePath = Path.Combine(sourcePath, rootFile);
 					if (File.Exists(fullRootFilePath))
 					{
-						zip.CreateEntryFromFile(fullRootFilePath, Path.GetFileName(fullRootFilePath), compressionLevel);
+						zip.CreateEntryFromFile(fullRootFilePath, Path.GetFileName(fullRootFilePath).Replace('\\', '/'), compressionLevel);
 					}
 					else if(Directory.Exists(fullRootFilePath))
 					{
 						foreach (var file in Directory.GetFiles(fullRootFilePath, "*", SearchOption.AllDirectories))
 						{
 							var relativePath = Path.GetRelativePath(sourcePath, file);
-							zip.CreateEntryFromFile(file, relativePath, compressionLevel);
+							zip.CreateEntryFromFile(file, relativePath.Replace('\\', '/'), compressionLevel);
 						}
 					}
 					else throw new FileNotFoundException($"Could not find file or directory to add to zip archive: {fullRootFilePath}");
