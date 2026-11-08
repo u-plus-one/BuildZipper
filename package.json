@@ -16,7 +16,8 @@
     "executable",
     "attribute"
   ],
-  "license": "See LICENSE.md",
+  "license": "GPL-3.0-only",
+  "licensesUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/LICENSE.md",
   "hideInEditor": true,
   "documentationUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/README.md",
   "changelogUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/CHANGELOG.md"
