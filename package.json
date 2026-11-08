@@ -18,5 +18,6 @@
   ],
   "license": "See LICENSE.md",
   "hideInEditor": true,
-  "documentationUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/README.md"
+  "documentationUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/README.md",
+  "changelogUrl": "https://github.com/u-plus-one/BuildZipper/blob/main/CHANGELOG.md"
 }
